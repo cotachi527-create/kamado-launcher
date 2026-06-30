@@ -74,23 +74,24 @@
     .card-section { padding: 16px 20px 0; flex-shrink: 0; }
     .card-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 9px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
       margin-bottom: 4px;
     }
     .task-card {
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 13px;
-      padding: 13px 12px 10px;
+      border-radius: 12px;
+      padding: 7px 8px 6px;
       cursor: pointer;
       transition: background 0.15s, border-color 0.18s, transform 0.12s;
       position: relative;
       user-select: none;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      min-height: 90px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      grid-template-rows: 1fr auto;
+      gap: 2px 6px;
+      min-height: 60px;
       -webkit-tap-highlight-color: transparent;
     }
     .task-card.ready:hover {
@@ -102,11 +103,30 @@
     .task-card.wip { opacity: 0.48; cursor: default; }
     .task-card.drag-over { border-color: var(--accent); background: rgba(91,138,245,0.08); }
     .task-card.dragging { opacity: 0.3; }
-    .card-emoji { font-size: 1.4rem; line-height: 1; }
-    .card-title { font-size: 0.78rem; font-weight: 600; color: var(--text); line-height: 1.25; }
-    .card-sub   { font-size: 0.62rem; color: var(--text-sub); }
-    .card-arrow { margin-top: auto; padding-top: 4px; font-size: 0.65rem; color: var(--accent); font-weight: 600; }
-    .card-wip-lbl { margin-top: auto; padding-top: 4px; font-size: 0.6rem; color: var(--text-sub); }
+    .card-emoji {
+      grid-column: 1; grid-row: 1;
+      font-size: 1.4rem; line-height: 1;
+      align-self: center;
+    }
+    .card-content {
+      grid-column: 2; grid-row: 1;
+      display: flex; flex-direction: column;
+      justify-content: center; gap: 2px;
+      min-width: 0;
+    }
+    .card-title { font-size: 0.7rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+    .card-sub   { font-size: 0.56rem; color: var(--text-sub); }
+    .card-actions {
+      grid-column: 1 / -1; grid-row: 2;
+      display: flex; gap: 5px; align-items: center;
+      padding-top: 4px;
+      border-top: 1px solid var(--border);
+      margin-top: 3px;
+    }
+    .card-arrow { font-size: 0.56rem; color: var(--accent); font-weight: 600; }
+    .card-edit  { font-size: 0.56rem; color: var(--text-sub); cursor: pointer; background: none; border: none; font-family: inherit; padding: 0; transition: color 0.15s; }
+    .card-edit:hover { color: var(--text); }
+    .card-wip-lbl { font-size: 0.54rem; color: var(--text-sub); }
     .card-del {
       position: absolute; top: 7px; right: 7px;
       background: none; border: none; color: var(--text-sub);
@@ -139,6 +159,7 @@
       height: 420px;
       border: none;
       display: block;
+      filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.9);
     }
     .calendar-placeholder {
       height: 120px;
@@ -182,6 +203,13 @@
     }
     .ep-opt:hover { background: var(--panel2); }
     .ep-opt.picked { background: rgba(91,138,245,0.22); }
+    .btn-delete {
+      background: rgba(245,101,101,0.1); border: 1px solid rgba(245,101,101,0.3);
+      border-radius: 9px; color: var(--danger);
+      cursor: pointer; font-family: inherit; font-size: 0.78rem;
+      padding: 9px 16px; transition: background 0.15s;
+    }
+    .btn-delete:hover { background: rgba(245,101,101,0.22); }
 
     .news-section { padding: 24px 24px 0; flex-shrink: 0; }
     .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
@@ -363,7 +391,7 @@
     <!-- やることカード -->
     <div class="card-section">
       <div class="section-header">
-        <h2>やること</h2>
+        <h2>アクションカード</h2>
         <button class="news-refresh" style="margin-left:auto" onclick="openCardModal()">＋ 追加</button>
       </div>
       <div class="card-grid" id="launcher-card-grid"></div>
@@ -371,7 +399,7 @@
 
     <div class="board-section">
       <div class="section-header">
-        <h2>AI作成ボード</h2>
+        <h2>作成ボード</h2>
       </div>
 
       <div class="board-controls">
@@ -466,9 +494,12 @@
       <label class="form-label">リンク先URL（空欄だと準備中）</label>
       <input class="form-input" id="card-form-url" type="url" placeholder="https://..." />
     </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeCardModal()">キャンセル</button>
-      <button class="btn-save" onclick="saveCard()">追加する</button>
+    <div class="modal-actions" style="justify-content:space-between">
+      <button id="card-modal-delete-btn" class="btn-delete" style="display:none" onclick="deleteFromModal()">🗑 削除</button>
+      <div style="display:flex;gap:10px;margin-left:auto">
+        <button class="btn-cancel" onclick="closeCardModal()">キャンセル</button>
+        <button class="btn-save" onclick="saveCard()">追加する</button>
+      </div>
     </div>
   </div>
 </div>
@@ -606,16 +637,31 @@
 
       el.innerHTML = `
         <span class="card-emoji">${card.emoji}</span>
-        <div class="card-title">${_esc(card.title)}</div>
-        ${card.sub ? `<div class="card-sub">${_esc(card.sub)}</div>` : ''}
-        ${card.ready ? `<div class="card-arrow">→ 開く</div>` : `<div class="card-wip-lbl">準備中</div>`}
+        <div class="card-content">
+          <div class="card-title">${_esc(card.title)}</div>
+          ${card.sub ? `<div class="card-sub">${_esc(card.sub)}</div>` : ''}
+        </div>
+        ${card.ready
+          ? `<div class="card-actions">
+               <span class="card-arrow">→ 開く</span>
+               <button class="card-edit" onclick="editLauncherCard('${card.id}',event)">｜ 編集</button>
+             </div>`
+          : `<div class="card-actions">
+               <span class="card-wip-lbl">準備中</span>
+               <button class="card-edit" onclick="editLauncherCard('${card.id}',event)">｜ 編集</button>
+             </div>`}
         ${!_isDefaultCard(card.id) ? `<button class="card-del" title="削除" onclick="deleteLauncherCard('${card.id}',event)">✕</button>` : ''}
       `;
 
       if (card.ready && card.url) {
         el.addEventListener('click', e => {
           if (e.target.classList.contains('card-del')) return;
+          if (e.target.classList.contains('card-edit')) return;
           window.open(card.url, '_blank', 'noopener');
+        });
+      } else {
+        el.addEventListener('click', e => {
+          if (e.target.classList.contains('card-edit')) return;
         });
       }
 
@@ -661,6 +707,73 @@
     renderLauncherCards();
   }
 
+  function editLauncherCard(id, e) {
+    e.stopPropagation();
+    const cards = _loadLauncherCards();
+    const card  = cards.find(c => c.id === id);
+    if (!card) return;
+
+    // 絵文字グリッド構築
+    _cardPickedEmoji = card.emoji;
+    const grid = document.getElementById('emoji-pick-grid');
+    grid.innerHTML = '';
+    LAUNCHER_EMOJIS.forEach(em => {
+      const span = document.createElement('span');
+      span.className = `ep-opt ${em === _cardPickedEmoji ? 'picked' : ''}`;
+      span.textContent = em;
+      span.onclick = () => {
+        _cardPickedEmoji = em;
+        grid.querySelectorAll('.ep-opt').forEach(el => el.classList.toggle('picked', el.textContent === em));
+      };
+      grid.appendChild(span);
+    });
+
+    document.getElementById('card-form-title').value = card.title;
+    document.getElementById('card-form-sub').value   = card.sub   || '';
+    document.getElementById('card-form-url').value   = card.url   || '';
+
+    // 保存ボタンを「更新」モードに切り替え
+    const saveBtn = document.querySelector('#card-modal .btn-save');
+    saveBtn.textContent = '更新する';
+    saveBtn.onclick = () => updateCard(id);
+
+    // 削除ボタンを表示（デフォルトカード以外のみ削除可、デフォルトも表示するが確認あり）
+    const delBtn = document.getElementById('card-modal-delete-btn');
+    delBtn.style.display = 'block';
+    delBtn.dataset.targetId = id;
+
+    document.getElementById('card-modal').classList.add('open');
+    setTimeout(() => document.getElementById('card-form-title').focus(), 50);
+  }
+
+  function deleteFromModal() {
+    const id = document.getElementById('card-modal-delete-btn').dataset.targetId;
+    if (!id) return;
+    if (!confirm('このカードを削除しますか？')) return;
+    _saveLauncherCards(_loadLauncherCards().filter(c => c.id !== id));
+    renderLauncherCards();
+    closeCardModal();
+  }
+
+  function updateCard(id) {
+    const title = document.getElementById('card-form-title').value.trim();
+    if (!title) { document.getElementById('card-form-title').focus(); return; }
+    const url = document.getElementById('card-form-url').value.trim();
+    const sub = document.getElementById('card-form-sub').value.trim();
+    const cards = _loadLauncherCards();
+    const idx   = cards.findIndex(c => c.id === id);
+    if (idx >= 0) {
+      cards[idx] = { ...cards[idx], emoji: _cardPickedEmoji, title, sub, url, ready: !!url };
+      _saveLauncherCards(cards);
+      renderLauncherCards();
+    }
+    // ボタンを追加モードに戻す
+    const saveBtn = document.querySelector('#card-modal .btn-save');
+    saveBtn.textContent = '追加する';
+    saveBtn.onclick = saveCard;
+    closeCardModal();
+  }
+
   function _esc(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -689,6 +802,12 @@
 
   function closeCardModal() {
     document.getElementById('card-modal').classList.remove('open');
+    const saveBtn = document.querySelector('#card-modal .btn-save');
+    saveBtn.textContent = '追加する';
+    saveBtn.onclick = saveCard;
+    const delBtn = document.getElementById('card-modal-delete-btn');
+    delBtn.style.display = 'none';
+    delBtn.dataset.targetId = '';
   }
 
   function saveCard() {
@@ -723,7 +842,7 @@
 
   const CALENDAR_URL_KEY = 'gcal_embed_url';
 
-  const DEFAULT_CALENDAR_URL = 'https://calendar.google.com/calendar/embed?src=cotachi527%40gmail.com&ctz=Asia%2FTokyo';
+  const DEFAULT_CALENDAR_URL = 'https://calendar.google.com/calendar/embed?src=cotachi527%40gmail.com&ctz=Asia%2FTokyo&bgcolor=%23ffffff';
 
   function initCalendar() {
     const saved = (() => { try { return localStorage.getItem(CALENDAR_URL_KEY) || ''; } catch { return ''; } })();
