@@ -885,6 +885,57 @@
 
   const STORAGE_PREFIX = 'routine_';
   const CREATIONS_KEY  = 'ai_creations';
+  const GAS_API_URL    = 'https://script.google.com/macros/s/AKfycbz9sZ5I8GYcr30hKr_JTwyoH_S7DqyHd7rpnEvr1zLZbaS6OkV2GBfBBaC5bmcifuD7/exec';
+  const GAS_CACHE_KEY  = 'gas_sync_cache';
+  const GAS_CACHE_TTL  = 5 * 60 * 1000; // 5分キャッシュ
+
+  // GASからルーティン実績を読み込んでlocalStorageに反映
+  async function syncFromGAS() {
+    try {
+      const cached = _safeLSGet(GAS_CACHE_KEY, null);
+      if (cached && Date.now() - cached.ts < GAS_CACHE_TTL) return;
+
+      const res     = await fetch(GAS_API_URL, { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) return;
+      const records = await res.json();
+
+      const byDate = {};
+      records.forEach(r => {
+        if (!r.date || !r.task || !r.done) return;
+        if (!byDate[r.date]) byDate[r.date] = [];
+        if (!byDate[r.date].includes(r.task)) byDate[r.date].push(r.task);
+      });
+
+      Object.entries(byDate).forEach(([date, tasks]) => {
+        const key      = STORAGE_PREFIX + date;
+        const existing = _memLSGet(key, []);
+        const merged   = [...new Set([...existing, ...tasks])];
+        _memLSSet(key, merged);
+      });
+
+      _safeLSSet(GAS_CACHE_KEY, { ts: Date.now() });
+      buildTaskList();
+      buildHistoryGrid();
+    } catch(e) {
+      console.warn('GAS読み取り失敗:', e.message);
+    }
+  }
+
+  // タスクのON/OFFをGASに書き込む（no-corsでも送信は届く）
+  async function postToGAS(task, done) {
+    try {
+      await fetch(GAS_API_URL, {
+        method:  'POST',
+        mode:    'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body:    JSON.stringify({ date: todayStr(), task, done }),
+      });
+      // キャッシュをクリアして次回読み込み時に最新を取得
+      try { localStorage.removeItem(GAS_CACHE_KEY); } catch {}
+    } catch(e) {
+      console.warn('GAS書き込み失敗:', e.message);
+    }
+  }
 
   // ── [FIX①] RSS: 複数プロキシを用意してフォールバック ──
   const RSS_FEEDS = [
@@ -1187,12 +1238,14 @@
   }
 
   function toggleTask(label) {
-    const dateStr = todayStr();
-    let done = _memLSGet(STORAGE_PREFIX + dateStr, []);
-    done = done.includes(label) ? done.filter(l => l !== label) : [...done, label];
+    const dateStr  = todayStr();
+    let done       = _memLSGet(STORAGE_PREFIX + dateStr, []);
+    const isDone   = !done.includes(label);
+    done           = isDone ? [...done, label] : done.filter(l => l !== label);
     _memLSSet(STORAGE_PREFIX + dateStr, done);
     buildTaskList();
     buildHistoryGrid();
+    postToGAS(label, isDone); // GASに非同期で書き込み
   }
 
   // ── [FIX①] News: 並列フェッチ + プロキシフォールバック ──
@@ -1628,6 +1681,7 @@
     initCalendar();
     buildTaskList();
     buildHistoryGrid();
+    syncFromGAS(); // GASから最新データを取得（バックグラウンドで）
 
     try {
       const stored = await _getStoredHandle();
