@@ -65,6 +65,137 @@
       </div>
     </div>
 
+    <!-- このアプリで何ができるか -->
+    <div class="mb-6 bg-slate-900 border border-slate-700 rounded-2xl p-7">
+      <p class="text-center text-lg font-black text-white mb-5">このアプリで何ができるか</p>
+      <div class="grid grid-cols-2 gap-3 text-sm">
+        <div class="flex items-start gap-3 bg-slate-800 rounded-xl p-4 border border-slate-700">
+          <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <div class="font-bold text-slate-200 mb-1">毎日のルーティンを記録・可視化</div>
+            <div class="text-xs text-slate-400 leading-relaxed">筋トレ・読書・片付けなど5項目のチェックを毎朝記録。週間グリッドで継続状況が一目でわかる。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 bg-slate-800 rounded-xl p-4 border border-slate-700">
+          <i data-lucide="zap" class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <div class="font-bold text-slate-200 mb-1">やることを即起動</div>
+            <div class="text-xs text-slate-400 leading-relaxed">カードをタップするだけでAI・メルカリ・コード作成など各作業へ直行。迷う時間をゼロに。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 bg-slate-800 rounded-xl p-4 border border-slate-700">
+          <i data-lucide="layers" class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <div class="font-bold text-slate-200 mb-1">8種の作成ボードを使い分け</div>
+            <div class="text-xs text-slate-400 leading-relaxed">AI生成・3ワード・画像配置・動画・メール・Word・表計算など目的に合ったボードへ即切替。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 bg-slate-800 rounded-xl p-4 border border-slate-700">
+          <i data-lucide="smartphone" class="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <div class="font-bold text-slate-200 mb-1">PCとスマホで続きから再開</div>
+            <div class="text-xs text-slate-400 leading-relaxed">Googleログインすると作業状態がクラウドに保存。スマホから開いてもPCの続きが表示される。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 bg-slate-800 rounded-xl p-4 border border-slate-700">
+          <i data-lucide="image" class="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <div class="font-bold text-slate-200 mb-1">AI制作物をギャラリーで管理</div>
+            <div class="text-xs text-slate-400 leading-relaxed">PCの指定フォルダを読み込み、生成画像をサムネ表示。クリックでプロンプトを確認・編集できる。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 bg-slate-800 rounded-xl p-4 border border-slate-700">
+          <i data-lucide="calendar" class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <div class="font-bold text-slate-200 mb-1">Googleカレンダーを同一画面で確認</div>
+            <div class="text-xs text-slate-400 leading-relaxed">予定を別タブで開かなくてもダッシュボードから直接確認。作業しながらスケジュールを把握。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- スクリーンショット注釈 -->
+    <div class="mb-4 bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden">
+      <div class="px-6 pt-5 pb-3 flex items-center gap-2">
+        <i data-lucide="monitor" class="w-4 h-4 text-blue-400"></i>
+        <span class="text-sm font-bold text-slate-200">実際の画面 — 各エリアの役割</span>
+        <span class="text-xs text-slate-500 ml-auto font-mono">kamado-launcher.vercel.app</span>
+      </div>
+      <!-- 注釈つき画像エリア -->
+      <div class="relative mx-4 mb-3">
+        <img id="ss-img" src="screenshot.png" alt="ダッシュボード画面" class="w-full rounded-xl border border-slate-700" />
+        <!-- 吹き出し：1 ルーティン管理 -->
+        <div class="absolute" style="top:5%;left:0.5%">
+          <div class="flex items-center gap-1">
+            <span class="bg-emerald-500 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full flex-shrink-0">1</span>
+            <span class="bg-emerald-950/90 border border-emerald-700 text-emerald-300 text-[10px] px-1.5 py-0.5 rounded-lg whitespace-nowrap backdrop-blur-sm">ルーティン管理</span>
+          </div>
+        </div>
+        <!-- 吹き出し：2 アクションカード -->
+        <div class="absolute" style="top:1%;left:26%">
+          <div class="flex items-center gap-1">
+            <span class="bg-blue-500 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full flex-shrink-0">2</span>
+            <span class="bg-blue-950/90 border border-blue-700 text-blue-300 text-[10px] px-1.5 py-0.5 rounded-lg whitespace-nowrap backdrop-blur-sm">アクションカード</span>
+          </div>
+        </div>
+        <!-- 吹き出し：3 作成ボード -->
+        <div class="absolute" style="top:26%;left:26%">
+          <div class="flex items-center gap-1">
+            <span class="bg-blue-500 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full flex-shrink-0">3</span>
+            <span class="bg-blue-950/90 border border-blue-700 text-blue-300 text-[10px] px-1.5 py-0.5 rounded-lg whitespace-nowrap backdrop-blur-sm">作成ボード（8種）</span>
+          </div>
+        </div>
+        <!-- 吹き出し：4 Googleカレンダー -->
+        <div class="absolute" style="top:58%;left:26%">
+          <div class="flex items-center gap-1">
+            <span class="bg-blue-500 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full flex-shrink-0">4</span>
+            <span class="bg-blue-950/90 border border-blue-700 text-blue-300 text-[10px] px-1.5 py-0.5 rounded-lg whitespace-nowrap backdrop-blur-sm">Google カレンダー</span>
+          </div>
+        </div>
+        <!-- 吹き出し：5 制作物ギャラリー -->
+        <div class="absolute" style="top:12%;right:0.5%">
+          <div class="flex items-center gap-1">
+            <span class="bg-purple-500 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full flex-shrink-0">5</span>
+            <span class="bg-purple-950/90 border border-purple-700 text-purple-300 text-[10px] px-1.5 py-0.5 rounded-lg whitespace-nowrap backdrop-blur-sm">制作物ギャラリー</span>
+          </div>
+        </div>
+        <!-- 吹き出し：6 Googleログイン -->
+        <div class="absolute" style="top:1%;right:0.5%">
+          <div class="flex items-center gap-1">
+            <span class="bg-orange-500 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full flex-shrink-0">6</span>
+            <span class="bg-orange-950/90 border border-orange-700 text-orange-300 text-[10px] px-1.5 py-0.5 rounded-lg whitespace-nowrap backdrop-blur-sm">Googleログイン</span>
+          </div>
+        </div>
+      </div>
+      <!-- 凡例 -->
+      <div class="grid grid-cols-3 gap-2 mx-4 mb-5 text-[11px]">
+        <div class="flex items-center gap-2 bg-slate-800 rounded-xl px-3 py-2 border border-slate-700">
+          <span class="bg-emerald-500 text-white font-black w-5 h-5 flex items-center justify-center rounded-full text-[10px] flex-shrink-0">1</span>
+          <div><div class="font-bold text-emerald-300">ルーティン管理</div><div class="text-slate-400">毎日のチェックをSheets連携</div></div>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-800 rounded-xl px-3 py-2 border border-slate-700">
+          <span class="bg-blue-500 text-white font-black w-5 h-5 flex items-center justify-center rounded-full text-[10px] flex-shrink-0">2</span>
+          <div><div class="font-bold text-blue-300">アクションカード</div><div class="text-slate-400">やること一覧 → 即起動</div></div>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-800 rounded-xl px-3 py-2 border border-slate-700">
+          <span class="bg-blue-500 text-white font-black w-5 h-5 flex items-center justify-center rounded-full text-[10px] flex-shrink-0">3</span>
+          <div><div class="font-bold text-blue-300">作成ボード</div><div class="text-slate-400">8種のボードを切替</div></div>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-800 rounded-xl px-3 py-2 border border-slate-700">
+          <span class="bg-blue-500 text-white font-black w-5 h-5 flex items-center justify-center rounded-full text-[10px] flex-shrink-0">4</span>
+          <div><div class="font-bold text-blue-300">Googleカレンダー</div><div class="text-slate-400">スケジュール確認</div></div>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-800 rounded-xl px-3 py-2 border border-slate-700">
+          <span class="bg-purple-500 text-white font-black w-5 h-5 flex items-center justify-center rounded-full text-[10px] flex-shrink-0">5</span>
+          <div><div class="font-bold text-purple-300">制作物ギャラリー</div><div class="text-slate-400">ローカル画像をサムネ表示</div></div>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-800 rounded-xl px-3 py-2 border border-slate-700">
+          <span class="bg-orange-500 text-white font-black w-5 h-5 flex items-center justify-center rounded-full text-[10px] flex-shrink-0">6</span>
+          <div><div class="font-bold text-orange-300">Googleログイン</div><div class="text-slate-400">クロスデバイス同期</div></div>
+        </div>
+      </div>
+    </div>
+
     <!-- 全体構成 -->
     <div class="bg-slate-900 border border-slate-700 rounded-2xl p-7 md:p-10 mb-4">
       <div class="text-center mb-6">
