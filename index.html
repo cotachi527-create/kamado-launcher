@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
   <title>AI ダッシュボード</title>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
@@ -365,6 +369,18 @@
     .gallery { border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
     .gallery-header { display: flex; align-items: center; gap: 8px; padding: 16px 14px 10px; flex-shrink: 0; }
     .gallery-header h2 { font-size: 0.85rem; font-weight: 600; letter-spacing: 0.06em; color: var(--text); flex: 1; }
+    /* Firebase 認証UI */
+    .fb-auth-bar { display: flex; align-items: center; gap: 8px; padding: 6px 14px 0; flex-shrink: 0; }
+    .fb-user-info { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+    .fb-avatar { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
+    .fb-username { font-size: 0.65rem; color: var(--text-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .fb-signin-btn { background: #4285F4; border: none; color: #fff; font-size: 0.65rem; font-weight: 600; padding: 5px 12px; border-radius: 7px; cursor: pointer; font-family: inherit; white-space: nowrap; transition: opacity 0.15s; }
+    .fb-signin-btn:hover { opacity: 0.88; }
+    .fb-signout-btn { background: none; border: 1px solid var(--border); color: var(--text-sub); font-size: 0.62rem; padding: 3px 8px; border-radius: 6px; cursor: pointer; font-family: inherit; transition: background 0.12s; }
+    .fb-signout-btn:hover { background: var(--panel2); }
+    .fb-sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #48bb78; flex-shrink: 0; }
+    .fb-sync-dot.offline { background: var(--text-sub); }
+    .fb-folder-hint { font-size: 0.62rem; color: var(--accent); padding: 3px 14px 0; }
     .img-folder-pick-btn { background: none; border: 1px solid var(--border); color: var(--text-sub); font-size: 1rem; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
     .img-folder-pick-btn:hover { background: var(--panel2); }
     .img-folder-bar { display: flex; align-items: center; gap: 6px; padding: 0 14px 8px; flex-shrink: 0; }
@@ -519,6 +535,18 @@
   </main>
 
   <aside class="gallery">
+    <!-- Firebase 認証バー -->
+    <div class="fb-auth-bar" id="fb-auth-bar">
+      <div class="fb-user-info" id="fb-user-info" style="display:none">
+        <div class="fb-sync-dot" id="fb-sync-dot"></div>
+        <img class="fb-avatar" id="fb-avatar" src="" alt="" />
+        <span class="fb-username" id="fb-username"></span>
+        <button class="fb-signout-btn" onclick="fbSignOut()">ログアウト</button>
+      </div>
+      <button class="fb-signin-btn" id="fb-signin-btn" onclick="fbSignIn()">G Googleでログイン</button>
+    </div>
+    <div class="fb-folder-hint" id="fb-folder-hint" style="display:none"></div>
+
     <div class="gallery-header">
       <h2>過去の制作物</h2>
       <button class="img-folder-pick-btn" id="img-folder-pick-btn" onclick="pickImageFolder()" title="フォルダを開く">📁</button>
@@ -1209,31 +1237,108 @@
   ];
   let _activeBoard = 'ai';
 
+  // ══════════════════════════════════════════
+  //  Firebase 設定（コンソールで取得した値に変更してください）
+  // ══════════════════════════════════════════
+  const FB_CONFIG = {
+    apiKey:            "AIzaSyDFQxqSMhCjaWpF12BIBzsUV51NEetYCdg",
+    authDomain:        "kamado-launcher.firebaseapp.com",
+    projectId:         "kamado-launcher",
+    storageBucket:     "kamado-launcher.firebasestorage.app",
+    messagingSenderId: "150841254160",
+    appId:             "1:150841254160:web:bfec08162052cb395e8595"
+  };
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  let _fbApp = null, _fbAuth = null, _fbDb = null, _fbUser = null;
+  let _fbUnsub = null;   // Firestore リアルタイムリスナー解除用
+
+  function _fbInit() {
+    try {
+      _fbApp  = firebase.initializeApp(FB_CONFIG);
+      _fbAuth = firebase.auth();
+      _fbDb   = firebase.firestore();
+      _fbAuth.onAuthStateChanged(user => {
+        _fbUser = user;
+        _updateAuthUI();
+        if (user) {
+          _fbStartListener();
+        } else {
+          if (_fbUnsub) { _fbUnsub(); _fbUnsub = null; }
+        }
+      });
+    } catch(e) {
+      console.warn('[Firebase] 初期化エラー:', e.message);
+    }
+  }
+
+  function fbSignIn() {
+    if (!_fbAuth) return;
+    const provider = new firebase.auth.GoogleAuthProvider();
+    _fbAuth.signInWithPopup(provider).catch(e => alert('ログインに失敗しました: ' + e.message));
+  }
+
+  function fbSignOut() {
+    if (!_fbAuth) return;
+    _fbAuth.signOut();
+  }
+
+  function _updateAuthUI() {
+    const signBtn  = document.getElementById('fb-signin-btn');
+    const userInfo = document.getElementById('fb-user-info');
+    const avatar   = document.getElementById('fb-avatar');
+    const uname    = document.getElementById('fb-username');
+    const dot      = document.getElementById('fb-sync-dot');
+    if (!signBtn) return;
+    if (_fbUser) {
+      signBtn.style.display  = 'none';
+      userInfo.style.display = 'flex';
+      avatar.src  = _fbUser.photoURL  || '';
+      avatar.style.display = _fbUser.photoURL ? '' : 'none';
+      uname.textContent = _fbUser.displayName || _fbUser.email || '';
+      dot.classList.remove('offline');
+    } else {
+      signBtn.style.display  = '';
+      userInfo.style.display = 'none';
+    }
+  }
+
+  function _fbDocRef() {
+    if (!_fbDb || !_fbUser) return null;
+    return _fbDb.collection('boardStates').doc(_fbUser.uid);
+  }
+
   // ── 作業状態の自動保存・復元 ──
   const BOARD_STATE_KEY = 'board_work_state';
 
-  function saveBoardState() {
-    const state = { board: _activeBoard };
-    // AI
+  function _collectState() {
+    const state = { board: _activeBoard, updatedAt: Date.now() };
     const prompt = document.getElementById('prompt-input');
     const tool   = document.getElementById('tool-select');
     if (prompt) state.ai_prompt = prompt.value;
     if (tool)   state.ai_tool   = tool.value;
-    // 3ワード
-    state.word3 = { ...W3_CATEGORIES };  // selection indices
     Object.keys(W3_CATEGORIES).forEach(k => { state['w3_' + k] = _w3sel[k]; });
-    // メール
     ['em-to','em-cc','em-subject'].forEach(id => {
       const el = document.getElementById(id); if (el) state[id] = el.value;
     });
     const emBody = document.getElementById('em-body');
     if (emBody) state.em_body = emBody.innerHTML;
-    // ワード
     const rteEd = document.getElementById('rte-editor');
     if (rteEd) state.rte_content = rteEd.innerHTML;
-    // 表計算
     state.excel = { ..._excelData };
+    return state;
+  }
+
+  function saveBoardState() {
+    const state = _collectState();
     try { localStorage.setItem(BOARD_STATE_KEY, JSON.stringify(state)); } catch {}
+    // Firebase にも保存
+    const ref = _fbDocRef();
+    if (ref) {
+      ref.set(state, { merge: true }).catch(e => console.warn('[Firestore] 保存エラー:', e));
+      const dot = document.getElementById('fb-sync-dot');
+      if (dot) { dot.style.background = '#48bb78'; }
+    }
   }
 
   function loadBoardState() {
@@ -1246,13 +1351,67 @@
 
   function restoreBoardState(state) {
     if (!state) return false;
-    // Excel data
     if (state.excel) Object.assign(_excelData, state.excel);
-    // 3ワード selection
     Object.keys(W3_CATEGORIES).forEach(k => {
       if (state['w3_' + k] !== undefined) _w3sel[k] = state['w3_' + k];
     });
     return true;
+  }
+
+  function applyRestoredState(state) {
+    if (!state) return;
+    const prompt = document.getElementById('prompt-input');
+    const tool   = document.getElementById('tool-select');
+    if (prompt && state.ai_prompt !== undefined) prompt.value = state.ai_prompt;
+    if (tool   && state.ai_tool   !== undefined) tool.value   = state.ai_tool;
+    ['em-to','em-cc','em-subject'].forEach(id => {
+      const el = document.getElementById(id); if (el && state[id] !== undefined) el.value = state[id];
+    });
+    const emBody = document.getElementById('em-body');
+    if (emBody && state.em_body) emBody.innerHTML = state.em_body;
+    const rteEd = document.getElementById('rte-editor');
+    if (rteEd && state.rte_content) rteEd.innerHTML = state.rte_content;
+  }
+
+  // Firestore リアルタイムリスナー（他デバイスの変更を受信）
+  function _fbStartListener() {
+    const ref = _fbDocRef();
+    if (!ref) return;
+    if (_fbUnsub) _fbUnsub();
+    _fbUnsub = ref.onSnapshot(snap => {
+      if (!snap.exists) return;
+      const remoteState = snap.data();
+      // ローカルより新しい場合のみ反映
+      const localRaw = localStorage.getItem(BOARD_STATE_KEY);
+      const localState = localRaw ? JSON.parse(localRaw) : null;
+      const localTs  = localState?.updatedAt || 0;
+      const remoteTs = remoteState.updatedAt || 0;
+      if (remoteTs > localTs + 3000) {   // 3秒より新しいリモートを優先
+        restoreBoardState(remoteState);
+        try { localStorage.setItem(BOARD_STATE_KEY, JSON.stringify(remoteState)); } catch {}
+        // ボード切り替え
+        if (remoteState.board && remoteState.board !== _activeBoard) {
+          selectBoard(remoteState.board);
+        } else {
+          applyRestoredState(remoteState);
+        }
+        _showSyncToast();
+      }
+      // フォルダ名ヒント
+      if (remoteState.imgFolderName && !_imgFolderHandle) {
+        const hint = document.getElementById('fb-folder-hint');
+        if (hint) {
+          hint.textContent = `📂 前回のフォルダ: "${remoteState.imgFolderName}" (📁ボタンで再接続)`;
+          hint.style.display = '';
+        }
+      }
+    }, err => console.warn('[Firestore] リスナーエラー:', err));
+  }
+
+  // フォルダ名を Firestore に保存
+  function _fbSaveFolderName(name) {
+    const ref = _fbDocRef();
+    if (ref) ref.set({ imgFolderName: name }, { merge: true }).catch(() => {});
   }
 
   let _saveTimer = null;
@@ -1267,6 +1426,14 @@
     toast.textContent = '⏱ 前回の作業を復元しました';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 2800);
+  }
+
+  function _showSyncToast() {
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2d3748;border:1px solid #48bb78;color:#48bb78;font-size:0.75rem;padding:8px 18px;border-radius:20px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.4);';
+    toast.textContent = '☁ 別デバイスの変更を同期しました';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
   }
 
   function initBoardSystem() {
@@ -2162,6 +2329,11 @@
       const handle = await window.showDirectoryPicker({ mode: 'read' });
       _imgFolderHandle = handle;
       await _saveImgHandle(handle);
+      // フォルダ名を Firestore に記録（他デバイスへのヒント用）
+      _fbSaveFolderName(handle.name);
+      // ヒントを非表示
+      const hint = document.getElementById('fb-folder-hint');
+      if (hint) hint.style.display = 'none';
       await buildImgGallery();
     } catch (e) { /* AbortError = ユーザーキャンセル */ }
   }
@@ -2449,6 +2621,8 @@
 
   // ── Init ──
   async function init() {
+    _fbInit();   // Firebase 初期化（認証状態の監視開始）
+
     renderLauncherCards();
     initBoardSystem();
     initCalendar();
