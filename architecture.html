@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>AI の竈 — アプリ構成図解</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans JP"', '"Hiragino Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-200 antialiased leading-relaxed border-t-4 border-blue-500">
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-16">
+
+    <!-- HERO -->
+    <div class="text-center mb-10">
+      <div class="inline-block bg-blue-950 text-blue-400 px-5 py-2 rounded-full text-sm font-medium mb-6 border border-blue-800">
+        AIの竈 — kamado-launcher
+      </div>
+      <h1 class="text-3xl md:text-5xl font-black text-white tracking-tight mb-3">
+        アプリ<span class="text-blue-400">構成</span>図解
+      </h1>
+      <p class="text-slate-400 text-lg max-w-xl mx-auto leading-relaxed">
+        アクションカード・作成ボード・制作物ギャラリーを<br>1つのHTMLファイルで統合。クロスデバイス同期つき。
+      </p>
+    </div>
+
+    <!-- 3カラム説明バー -->
+    <div class="mb-4 bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden">
+      <div class="px-6 pt-6 pb-3">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="monitor" class="w-4 h-4 text-blue-400"></i>
+          <span class="text-sm font-bold text-slate-200">画面レイアウト（3カラム構成）</span>
+          <span class="text-xs text-slate-500 ml-auto font-mono">kamado-launcher.vercel.app</span>
+        </div>
+        <div class="flex gap-0 rounded-xl overflow-hidden border border-slate-700 text-xs text-center">
+          <div class="flex-1 bg-emerald-950 border-r border-slate-700 py-3 px-2">
+            <div class="font-bold text-emerald-300 mb-0.5">左カラム</div>
+            <div class="text-slate-400 text-[11px]">ルーティン管理</div>
+          </div>
+          <div class="flex-[2] bg-blue-950 border-r border-slate-700 py-3 px-2">
+            <div class="font-bold text-blue-300 mb-0.5">中央カラム（メイン）</div>
+            <div class="text-slate-400 text-[11px]">アクションカード・作成ボード・カレンダー</div>
+          </div>
+          <div class="flex-1 bg-purple-950 py-3 px-2">
+            <div class="font-bold text-purple-300 mb-0.5">右カラム</div>
+            <div class="text-slate-400 text-[11px]">制作物ギャラリー</div>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 pb-6 pt-2 text-xs text-slate-500 text-center">
+        単一HTMLファイル（約 2,600行）で3カラムすべてを制御
+      </div>
+    </div>
+
+    <!-- 全体構成 -->
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl p-7 md:p-10 mb-4">
+      <div class="text-center mb-6">
+        <p class="text-lg font-black text-white mb-1">データ保存先は目的ごとに使い分け</p>
+        <p class="text-sm text-slate-400">ローカル・Google・Firebase の3層で管理</p>
+      </div>
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center gap-3 bg-slate-800 border border-slate-600 rounded-xl p-4">
+          <div class="w-8 h-8 rounded-lg bg-emerald-900 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="check-square" class="w-4 h-4 text-emerald-400"></i>
+          </div>
+          <div class="flex-1">
+            <div class="font-bold text-emerald-300 text-sm">左カラム — 朝タスク・週間実績</div>
+            <div class="text-xs text-slate-400 mt-0.5">ルーティン管理。チェック操作 → Google スプレッドシートへ GAS 経由で双方向同期。</div>
+          </div>
+          <span class="text-[11px] bg-emerald-950 border border-emerald-800 text-emerald-400 px-2 py-1 rounded-lg whitespace-nowrap">Google Sheets</span>
+        </div>
+        <div class="flex items-center gap-3 bg-slate-800 border-2 border-blue-700 rounded-xl p-4">
+          <div class="w-8 h-8 rounded-lg bg-blue-900 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="zap" class="w-4 h-4 text-blue-300"></i>
+          </div>
+          <div class="flex-1">
+            <div class="font-bold text-blue-300 text-sm">中央カラム — アクションカード・作成ボード</div>
+            <div class="text-xs text-slate-400 mt-0.5">作成ボード（8種）の内容を Firebase Firestore でリアルタイム同期。別デバイスでも続きから。</div>
+          </div>
+          <span class="text-[11px] bg-blue-950 border border-blue-800 text-blue-400 px-2 py-1 rounded-lg whitespace-nowrap">Firebase</span>
+        </div>
+        <div class="flex items-center gap-3 bg-slate-800 border border-slate-600 rounded-xl p-4">
+          <div class="w-8 h-8 rounded-lg bg-purple-900 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="image" class="w-4 h-4 text-purple-400"></i>
+          </div>
+          <div class="flex-1">
+            <div class="font-bold text-purple-300 text-sm">右カラム — 制作物ギャラリー</div>
+            <div class="text-xs text-slate-400 mt-0.5">PCローカルフォルダを File System Access API で直読み。フォルダ名のみ Firebase に記録。</div>
+          </div>
+          <span class="text-[11px] bg-purple-950 border border-purple-800 text-purple-400 px-2 py-1 rounded-lg whitespace-nowrap">ローカル</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 左カラム -->
+    <section class="mb-4 bg-slate-900 border border-slate-700 border-l-4 border-l-emerald-500 rounded-2xl px-7 py-8">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-10 h-10 rounded-lg bg-emerald-900 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="check-square" class="w-5 h-5 text-emerald-400"></i>
+        </div>
+        <h2 class="text-xl font-bold text-white">朝タスク ＆ 週間実績</h2>
+      </div>
+      <div class="bg-emerald-950 border border-emerald-800 rounded-xl p-5 mb-4">
+        <div class="text-xs text-emerald-400 font-bold mb-3 tracking-wider">データフロー</div>
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 mb-2">
+          <span class="bg-slate-700 px-2.5 py-1 rounded-lg">チェック操作</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-emerald-500"></i>
+          <span class="bg-slate-700 px-2.5 py-1 rounded-lg">localStorage</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-emerald-500"></i>
+          <span class="bg-emerald-900 border border-emerald-700 px-2.5 py-1 rounded-lg text-emerald-300">週間グリッドに反映</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300">
+          <span class="bg-orange-950 border border-orange-800 px-2.5 py-1 rounded-lg text-orange-300">Google Sheets</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-orange-500"></i>
+          <span class="bg-orange-950 border border-orange-800 px-2.5 py-1 rounded-lg text-orange-300">GAS Web API</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-orange-500"></i>
+          <span class="bg-slate-700 px-2.5 py-1 rounded-lg">localhost と双方向同期</span>
+        </div>
+      </div>
+      <div class="space-y-2 text-sm text-slate-400">
+        <div class="flex items-start gap-2"><i data-lucide="info" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i><span><strong class="text-slate-200">morning-routine.surge.sh</strong> と同一の Google スプレッドシートを共有。どちらのサイトからチェックしても互いに反映される。</span></div>
+      </div>
+    </section>
+
+    <!-- 中央カラム：アクションカード -->
+    <section class="mb-4 bg-slate-900 border border-slate-700 border-l-4 border-l-blue-500 rounded-2xl px-7 py-8">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-10 h-10 rounded-lg bg-blue-900 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="layout-grid" class="w-5 h-5 text-blue-400"></i>
+        </div>
+        <h2 class="text-xl font-bold text-white">アクションカード</h2>
+      </div>
+      <div class="bg-blue-950 border border-blue-800 rounded-xl p-5 mb-4">
+        <div class="text-xs text-blue-400 font-bold mb-3 tracking-wider">データフロー</div>
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300">
+          <span class="bg-slate-700 px-2.5 py-1 rounded-lg">カード追加・編集</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-blue-500"></i>
+          <span class="bg-blue-900 border border-blue-700 px-2.5 py-1 rounded-lg text-blue-300">localStorage</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-blue-500"></i>
+          <span class="bg-blue-900 border border-blue-700 px-2.5 py-1 rounded-lg text-blue-300">次回アクセス時に復元</span>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 text-xs mb-2">
+        <div class="bg-slate-800 rounded-xl p-3 border border-slate-700">
+          <div class="font-bold text-slate-200 mb-1">10列アイコン表示</div>
+          <div class="text-slate-400">絵文字＋タイトルで視覚的に管理。クリックで即リンクまたはアクション。</div>
+        </div>
+        <div class="bg-slate-800 rounded-xl p-3 border border-slate-700">
+          <div class="font-bold text-slate-200 mb-1">追加・編集・削除</div>
+          <div class="text-slate-400">モーダルで自由にカスタマイズ。URL・絵文字・タイトルを設定可能。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 中央カラム：作成ボード -->
+    <section class="mb-4 bg-slate-900 border border-slate-700 border-l-4 border-l-blue-500 rounded-2xl px-7 py-8">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-10 h-10 rounded-lg bg-blue-900 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="layers" class="w-5 h-5 text-blue-400"></i>
+        </div>
+        <h2 class="text-xl font-bold text-white">作成ボード（8種 切替式）</h2>
+      </div>
+
+      <!-- 8ボード一覧 -->
+      <div class="grid grid-cols-4 gap-2 mb-5 text-xs text-center">
+        <div class="bg-blue-950 border border-blue-800 rounded-xl py-2.5 px-1">
+          <i data-lucide="bot" class="w-4 h-4 text-blue-400 mx-auto mb-1"></i>
+          <div class="font-bold text-blue-300">AI生成</div>
+          <div class="text-slate-500 text-[10px] mt-0.5">Gemini等へ転送</div>
+        </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl py-2.5 px-1">
+          <i data-lucide="shuffle" class="w-4 h-4 text-slate-400 mx-auto mb-1"></i>
+          <div class="font-bold text-slate-300">3ワード</div>
+          <div class="text-slate-500 text-[10px] mt-0.5">組み合わせ</div>
+        </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl py-2.5 px-1">
+          <i data-lucide="image" class="w-4 h-4 text-slate-400 mx-auto mb-1"></i>
+          <div class="font-bold text-slate-300">画像配置</div>
+          <div class="text-slate-500 text-[10px] mt-0.5">自由配置</div>
+        </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl py-2.5 px-1">
+          <i data-lucide="video" class="w-4 h-4 text-slate-400 mx-auto mb-1"></i>
+          <div class="font-bold text-slate-300">動画</div>
+          <div class="text-slate-500 text-[10px] mt-0.5">プレイヤー</div>
+        </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl py-2.5 px-1">
+          <i data-lucide="columns" class="w-4 h-4 text-slate-400 mx-auto mb-1"></i>
+          <div class="font-bold text-slate-300">ムード</div>
+          <div class="text-slate-500 text-[10px] mt-0.5">ボード</div>
+        </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl py-2.5 px-1">
+          <i data-lucide="mail" class="w-4 h-4 text-slate-400 mx-auto mb-1"></i>
+          <div class="font-bold text-slate-300">HTMLメール</div>
+          <div class="text-slate-500 text-[10px] mt-0.5">作成</div>
+        </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl py-2.5 px-1">
+          <i data-lucide="file-text" class="w-4 h-4 text-slate-400 mx-auto mb-1"></i>
+          <div class="font-bold text-slate-300">Word風</div>
+          <div class="text-slate-500 text-[10px] mt-0.5">リッチエディタ</div>
+        </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl py-2.5 px-1">
+          <i data-lucide="table" class="w-4 h-4 text-slate-400 mx-auto mb-1"></i>
+          <div class="font-bold text-slate-300">表計算</div>
+          <div class="text-slate-500 text-[10px] mt-0.5">Excel風</div>
+        </div>
+      </div>
+
+      <!-- Firebase同期フロー -->
+      <div class="bg-blue-950 border border-blue-800 rounded-xl p-5 mb-4">
+        <div class="text-xs text-blue-400 font-bold mb-3 tracking-wider">クロスデバイス同期フロー</div>
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 mb-2">
+          <span class="bg-slate-700 px-2.5 py-1 rounded-lg">ボード操作</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-blue-500"></i>
+          <span class="bg-slate-700 px-2.5 py-1 rounded-lg">自動保存（800ms後）</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-blue-500"></i>
+          <span class="bg-blue-900 border border-blue-700 px-2.5 py-1 rounded-lg text-blue-300">Firestore</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300">
+          <span class="bg-blue-900 border border-blue-700 px-2.5 py-1 rounded-lg text-blue-300">Firestore</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-blue-500"></i>
+          <span class="bg-slate-700 px-2.5 py-1 rounded-lg">onSnapshot で受信</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-blue-500"></i>
+          <span class="bg-blue-900 border border-blue-700 px-2.5 py-1 rounded-lg text-blue-300">別デバイスに自動反映</span>
+        </div>
+      </div>
+
+      <!-- ドラッグ&ドロップ -->
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+        <div class="flex items-start gap-3">
+          <i data-lucide="move" class="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <div class="font-bold text-slate-200 text-sm mb-1">ドラッグ＆ドロップ対応</div>
+            <p class="text-xs text-slate-400 leading-relaxed">右のギャラリーから画像をドラッグしてボードに配置。外部からテキスト・ファイルをドロップしてそのまま貼り付け可能。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Firebase認証 -->
+    <section class="mb-4 bg-slate-900 border border-slate-700 border-l-4 border-l-orange-500 rounded-2xl px-7 py-8">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-10 h-10 rounded-lg bg-orange-900 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="cloud" class="w-5 h-5 text-orange-400"></i>
+        </div>
+        <h2 class="text-xl font-bold text-white">Firebase クロスデバイス同期</h2>
+      </div>
+
+      <div class="grid grid-cols-3 gap-3 mb-5">
+        <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 text-center">
+          <div class="w-8 h-8 rounded-full bg-orange-900 flex items-center justify-center mx-auto mb-2">
+            <span class="text-orange-400 font-black text-sm">1</span>
+          </div>
+          <div class="font-bold text-slate-200 text-xs mb-1">Googleログイン</div>
+          <div class="text-slate-400 text-[11px] leading-relaxed">Firebase Auth でUID発行。デバイス問わず同一アカウント。</div>
+        </div>
+        <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 text-center">
+          <div class="w-8 h-8 rounded-full bg-orange-900 flex items-center justify-center mx-auto mb-2">
+            <span class="text-orange-400 font-black text-sm">2</span>
+          </div>
+          <div class="font-bold text-slate-200 text-xs mb-1">Firestoreへ保存</div>
+          <div class="text-slate-400 text-[11px] leading-relaxed">boardStates/{uid} に作業状態を書き込み。タイムスタンプ付き。</div>
+        </div>
+        <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 text-center">
+          <div class="w-8 h-8 rounded-full bg-orange-900 flex items-center justify-center mx-auto mb-2">
+            <span class="text-orange-400 font-black text-sm">3</span>
+          </div>
+          <div class="font-bold text-slate-200 text-xs mb-1">別デバイスで受信</div>
+          <div class="text-slate-400 text-[11px] leading-relaxed">onSnapshot がリモート変更を検知し画面を自動更新。</div>
+        </div>
+      </div>
+
+      <div class="bg-orange-950 border border-orange-800 rounded-xl p-4">
+        <div class="text-xs text-orange-400 font-bold mb-2 tracking-wider">セキュリティルール</div>
+        <pre class="text-xs text-slate-300 font-mono leading-relaxed overflow-x-auto">match /boardStates/{userId} {
+  allow read, write:
+    if request.auth != null
+    &amp;&amp; request.auth.uid == userId;
+}</pre>
+        <p class="text-xs text-slate-500 mt-2">自分のデータは自分だけが読み書きできる。他のユーザーからは見えない。</p>
+      </div>
+    </section>
+
+    <!-- 右カラム：ギャラリー -->
+    <section class="mb-4 bg-slate-900 border border-slate-700 border-l-4 border-l-purple-500 rounded-2xl px-7 py-8">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-10 h-10 rounded-lg bg-purple-900 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="folder-open" class="w-5 h-5 text-purple-400"></i>
+        </div>
+        <h2 class="text-xl font-bold text-white">制作物ギャラリー（ローカル）</h2>
+      </div>
+      <div class="bg-purple-950 border border-purple-800 rounded-xl p-5 mb-4">
+        <div class="text-xs text-purple-400 font-bold mb-3 tracking-wider">データフロー</div>
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 mb-2">
+          <span class="bg-slate-700 px-2.5 py-1 rounded-lg">フォルダを選択</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-purple-500"></i>
+          <span class="bg-purple-900 border border-purple-700 px-2.5 py-1 rounded-lg text-purple-300">File System Access API</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-purple-500"></i>
+          <span class="bg-slate-700 px-2.5 py-1 rounded-lg">サムネイル表示</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300">
+          <span class="bg-slate-700 px-2.5 py-1 rounded-lg">フォルダ名</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-purple-500"></i>
+          <span class="bg-purple-900 border border-purple-700 px-2.5 py-1 rounded-lg text-purple-300">Firebase に記録</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-purple-500"></i>
+          <span class="bg-slate-700 px-2.5 py-1 rounded-lg">別デバイスでヒント表示</span>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-start gap-3 bg-slate-800 rounded-xl p-4 border border-slate-700">
+          <i data-lucide="lock" class="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <div class="font-bold text-slate-200 text-sm mb-1">意図的にローカルのまま</div>
+            <p class="text-xs text-slate-400 leading-relaxed">AIで生成した画像はサイズが大きくプライベート。クラウドには送らず、PCのフォルダを直接ブラウザで読む。フォルダハンドルはIndexedDBで保持し、再起動後も自動復元。</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 bg-slate-800 rounded-xl p-4 border border-slate-700">
+          <i data-lucide="message-square" class="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <div class="font-bold text-slate-200 text-sm mb-1">ライトボックス＋プロンプト管理</div>
+            <p class="text-xs text-slate-400 leading-relaxed">画像をクリックすると全画面表示。生成に使ったプロンプトをlocalStorageに紐づけて保存・表示・編集できる。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 技術スタック -->
+    <section class="mb-4 bg-slate-900 border border-slate-700 border-l-4 border-l-slate-500 rounded-2xl px-7 py-8">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="cpu" class="w-5 h-5 text-slate-400"></i>
+        </div>
+        <h2 class="text-xl font-bold text-white">技術スタック</h2>
+      </div>
+      <div class="grid grid-cols-2 gap-3 text-xs">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+          <div class="font-bold text-white mb-1">Vercel</div>
+          <div class="text-slate-400">index.html をホスティング。GitHub push で自動デプロイ。無料枠で運用。</div>
+        </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+          <div class="font-bold text-white mb-1">Firebase Auth</div>
+          <div class="text-slate-400">Google ログインでデバイス横断のUID発行。データを個人ごとに分離。</div>
+        </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+          <div class="font-bold text-white mb-1">Cloud Firestore</div>
+          <div class="text-slate-400">作成ボードをリアルタイム同期。Spark プラン（無料）で月50,000読み書き。</div>
+        </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+          <div class="font-bold text-white mb-1">Google Apps Script</div>
+          <div class="text-slate-400">ルーティンの読み書きAPIを無料で提供。Google スプレッドシートと連携。</div>
+        </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+          <div class="font-bold text-white mb-1">File System Access API</div>
+          <div class="text-slate-400">ブラウザからPCのローカルフォルダを直読み。サーバー不要でプライバシー保護。</div>
+        </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+          <div class="font-bold text-white mb-1">localStorage / IndexedDB</div>
+          <div class="text-slate-400">アクションカード設定・フォルダハンドル・プロンプトをデバイスに保持。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 苦戦したポイント -->
+    <section class="mb-4 bg-slate-900 border border-slate-700 border-l-4 border-l-yellow-500 rounded-2xl px-7 py-8">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-10 h-10 rounded-lg bg-yellow-900 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="zap" class="w-5 h-5 text-yellow-400"></i>
+        </div>
+        <h2 class="text-xl font-bold text-white">工夫したポイント</h2>
+      </div>
+      <div class="space-y-3">
+        <div class="bg-slate-800 border border-blue-900 rounded-xl p-5">
+          <div class="flex items-start gap-3">
+            <i data-lucide="git-merge" class="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0"></i>
+            <div>
+              <div class="font-bold text-slate-200 text-sm mb-1">タイムスタンプで同期の競合を防ぐ</div>
+              <p class="text-xs text-slate-400 leading-relaxed">保存時に updatedAt を記録。別デバイスの変更がリモートに届いたとき、ローカルより3秒以上新しい場合のみ反映。操作中のデータが上書きされない。</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-slate-800 border border-purple-900 rounded-xl p-5">
+          <div class="flex items-start gap-3">
+            <i data-lucide="folder" class="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0"></i>
+            <div>
+              <div class="font-bold text-slate-200 text-sm mb-1">ローカル画像はクラウドに送らない設計</div>
+              <p class="text-xs text-slate-400 leading-relaxed">File System Access API でブラウザ完結。フォルダ名だけFirestoreに保存することで、スマホから開いたとき「前回は works フォルダを使っていた」とヒントを表示できる。</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-slate-800 border border-emerald-900 rounded-xl p-5">
+          <div class="flex items-start gap-3">
+            <i data-lucide="move" class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0"></i>
+            <div>
+              <div class="font-bold text-slate-200 text-sm mb-1">ギャラリー → ボードへのドラッグ実装</div>
+              <p class="text-xs text-slate-400 leading-relaxed">右のローカル画像を左のボードへドラッグ&ドロップで配置。外部テキスト・ファイルのドロップにも対応。Drag-and-Drop API を活用。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- フッター -->
+    <div class="text-center bg-slate-900 border border-slate-700 rounded-2xl p-8">
+      <i data-lucide="flame" class="w-8 h-8 text-blue-400 mx-auto mb-4"></i>
+      <p class="text-lg font-bold text-white mb-2">AI の竈 — kamado-launcher</p>
+      <p class="text-slate-400 text-sm mb-5">アクションカード・マルチボード・ローカルギャラリーを1 HTMLで統合したパーソナルランチャー</p>
+      <a href="https://kamado-launcher.vercel.app" target="_blank" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors">
+        <i data-lucide="external-link" class="w-4 h-4"></i>
+        アプリを開く
+      </a>
+      <div class="mt-5 flex items-center justify-center gap-4 text-xs text-slate-500">
+        <span>HTML 単一ファイル（約2,600行）</span>
+        <span>·</span>
+        <span>Firebase Spark（無料）</span>
+        <span>·</span>
+        <span>Vercel 無料枠</span>
+      </div>
+    </div>
+
+  </main>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
