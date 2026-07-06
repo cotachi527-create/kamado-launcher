@@ -112,12 +112,13 @@
       font-size: 1.5rem; line-height: 1; flex-shrink: 0;
     }
     .card-content { display: flex; flex-direction: column; align-items: flex-start; flex: 1; min-width: 0; }
-    .card-title { font-size: 0.58rem; font-weight: 600; color: var(--text); line-height: 1.3; text-align: left; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .card-title { font-size: 0.72rem; font-weight: 600; color: var(--text); line-height: 1.3; text-align: left; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .card-sub   { display: none; }
     .card-actions {
-      display: flex; flex-direction: column; gap: 3px;
-      align-items: center; justify-content: center;
+      display: flex; flex-direction: row; gap: 4px;
+      align-items: center;
       flex-shrink: 0;
+      flex-wrap: wrap;
     }
     .card-arrow { font-size: 0.56rem; color: var(--accent); font-weight: 700; background: rgba(91,138,245,0.18); padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
     .card-edit  { font-size: 0.52rem; color: var(--text-sub); cursor: pointer; background: rgba(255,255,255,0.06); border: none; font-family: inherit; padding: 2px 6px; border-radius: 4px; transition: color 0.15s; white-space: nowrap; }
